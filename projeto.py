@@ -4,6 +4,7 @@ from tkinter import PhotoImage
 from PIL import Image, ImageTk
 import openpyxl
 
+#centralização de janelas
 def center_window(window):
     window.update_idletasks()
     width = window.winfo_width()
@@ -25,9 +26,11 @@ def clear_main():
             # Destruir o frame em si
             widget.destroy()
 
+#função para fechar todas as janelas do programa
 def fechar_janela(janela):
     janela.destroy()
 
+#função para reiniciar o programa após finalizar registro de usuário
 def reiniciar_programa():
     if 'janela_main' in globals():
         janela_main.destroy()
@@ -54,8 +57,17 @@ def show_custom_message(janela_main):
     ok_button = tk.Button(custom_message, text="OK", command=lambda: fechar_janela(custom_message))
     ok_button.pack(side=tk.LEFT, padx=10, pady=10)
 
+#função de validação de numeros no campo data
+def validade_input(input_str):
+    if input_str.isdigit() or input_str =="":
+        return True
+    else: 
+        return False
+
+#configuração de janela_main após clicar no botão de "registrar auditoria"
 def main_config_audit():
     clear_main()
+    global data_audit_entry
     janela_main.title("Cadastro de Auditorias")
 
     def export_audit_excel():
@@ -66,7 +78,7 @@ def main_config_audit():
         sheet_sup = planilha_sup.active
 
         #coletar os dados inseridos pelo usuário
-        supply_data = [data_audit_entry.get(), auditor_audit_entry.get(), specprod_entry.get(), armazenamento_entry.get(), spec_test_entry.get(), shipping_entry.get(), postos_entry.get()]
+        supply_data = [data_audit_entry.get(), rej_int_entry.get(), specprod_entry.get(), armazenamento_entry.get(), spec_test_entry.get(), field_entry.get(), postos_entry.get()]
 
         #encontrar a proxima linha vazia
         next_row_colab = sheet_sup.max_row + 1
@@ -105,47 +117,82 @@ def main_config_audit():
     img_logo_label = tk.Label(frame_imagem, image=img_logo)
     img_logo_label.image = img_logo
     img_logo_label.pack()
-
-    # Adicione as caixas de texto e seus rótulos aqui
+    
     #data
     data_audit_label = tk.Label(janela_main, text="Data:")
     data_audit_label.grid(row=4, column=1, padx=10, pady=10, sticky="e")
-    data_audit_entry = tk.Entry(janela_main, width=25)
+
+    #vincula o entry a u função date_input_barra_auto
+    data_audit_var = tk.StringVar()
+
+    #armazena len do entry, compara com 2 e 5 para adicionar / quando preciso
+    def on_date_entry_change(*args):
+        current_data_text = data_audit_var.get()
+        if len(current_data_text) == 2 or len(current_data_text) == 5:
+            data_audit_var.set(current_data_text + "/")
+            data_audit_entry.after(10, move_cursor)
+    def move_cursor():
+        data_audit_entry.icursor(tk.END)
+
+    data_audit_entry = tk.Entry(janela_main, width=25, validate="key", validatecommand=(validar_data_input_cmd, "%P"), textvariable=data_audit_var)
     data_audit_entry.grid(row=4, column=2, padx=10, pady=10)
-    #auditor
-    auditor_audit_label = tk.Label(janela_main, text="Auditor:")
-    auditor_audit_label.grid(row=5, column=1, padx=10, pady=10, sticky="e")
-    auditor_audit_entry = tk.Entry(janela_main, width=25)
-    auditor_audit_entry.grid(row=5, column=2, padx=10, pady=10)
+
+    #vincular a funçção a mudançã de caracterez armazenada current_data_text
+    data_audit_var.trace_add('write', on_date_entry_change)
+
+    #rej int (%)
+    rej_int_label = tk.Label(janela_main, text="Rej. Int. (%):")
+    rej_int_label.grid(row=5, column=1, padx=10, pady=10, sticky="e")
+    rej_int_entry = tk.Entry(janela_main, width=25)
+    rej_int_entry.grid(row=5, column=2, padx=10, pady=10)
     #Spec. Produto
     specprod_label = tk.Label(janela_main, text="Spec. Produto:")
     specprod_label.grid(row=6, column=1, padx=10, pady=10, sticky="e")
-    specprod_entry = tk.Entry(janela_main, width=25)
-    specprod_entry.grid(row=6, column=2, padx=10, pady=10)
+    specprod_combobox = ttk.Combobox(janela_main, values=["OK", "NG"], state="readonly", width=22)
+    specprod_combobox.grid(row=6, column=2, padx=10, pady=10)
     #Spec. Armazenamento
     armazenamento_label = tk.Label(janela_main, text="Spec. Armazenamento:")
     armazenamento_label.grid(row=7, column=1, padx=10, pady=10, sticky="e")
-    armazenamento_entry = tk.Entry(janela_main, width=25)
-    armazenamento_entry.grid(row=7, column=2, padx=10, pady=10)
+    specarm_combobox = ttk.Combobox(janela_main, values=["OK", "NG"], state="readonly", width=22)
+    specarm_combobox.grid(row=7, column=2, padx=10, pady=10)
     #Spec. Testes
     spectest_label = tk.Label(janela_main, text="Spec. Testes:")
     spectest_label.grid(row=8, column=1, padx=10, pady=10, sticky="e")
-    spec_test_entry = tk.Entry(janela_main, width=25)
-    spec_test_entry.grid(row=8, column=2, padx=10, pady=10)
-    #Spec. Shipping
-    shipping_label = tk.Label(janela_main, text="Spec. Shipping:")
-    shipping_label.grid(row=9, column=1, padx=10, pady=10, sticky="e")
-    shipping_entry = tk.Entry(janela_main, width=25)
-    shipping_entry.grid(row=9, column=2, padx=10, pady=10)
-    #Spec. Postos
-    postos_label = tk.Label(janela_main, text="Spec. Postos:")
-    postos_label.grid(row=10, column=1, padx=10, pady=10, sticky="e")
-    postos_entry = tk.Entry(janela_main, width=25)
-    postos_entry.grid(row=10, column=2, padx=10, pady=10)
+    spectest_combobox = ttk.Combobox(janela_main, values=["OK", "NG"], state="readonly", width=22)
+    spectest_combobox.grid(row=8, column=2, padx=10, pady=10)
+    #field (%)
+    field_label = tk.Label(janela_main, text="Lotes Reprovados (%):")
+    field_label.grid(row=9, column=1, padx=10, pady=10, sticky="e")
+    field_entry = tk.Entry(janela_main, width=25)
+    field_entry.grid(row=9, column=2, padx=10, pady=10)
+
+    #para o campo fornecedor, utilizaremos os dados da planilha fornecedores
+    def fornecedores_planilha():
+        fornecedores_ws = openpyxl.load_workbook("C:\\Users\\Gabriel Siza\\OneDrive\\Área de Trabalho\\Documents\\GABRIELIMPORTANTE\\Programing\\Python\\Aula 1\\Projeto Cadastro de Auditorias e Empreas [DECATHLON]\\Planilhas de Controle\\Registro de Fornecedores\\Fornecedores.xlsx")
+        open_fornecedores_ws = fornecedores_ws.active
+        fornecedores_list = []
+
+        #iteração das linhas da planilha para extrair os dados
+        for row in open_fornecedores_ws.iter_rows(min_row=2, values_only=True):
+            #coletar apenas o nome do fornecedor (coluna A)
+            fornecedor = row[0]
+            if fornecedor:
+                fornecedores_list.append(fornecedor)
+        return fornecedores_list
+
+    #chamando a função para obter os dados de fornecedores da planilha
+    fornecedores_data_loaded = fornecedores_planilha()
+
+    #Fornecedor (audit)
+    supply_audit_label = tk.Label(janela_main, text="Fornecedor:")
+    supply_audit_label.grid(row=10, column=1, padx=10, pady=10, sticky="e")
+    supply_combobox = ttk.Combobox(janela_main, values=fornecedores_data_loaded, state="readonly", width=22)
+    supply_combobox.grid(row=10, column=2, padx=10, pady=10)
 
     # Definindo uma função para fechar todas as janelas ao fechar o programa
     janela_main.protocol("WM_DELETE_WINDOW", fechar_programa)
 
+#configuração de janela_main após clicar no botão de "registrar fornecedor"
 def main_config_supply():
     clear_main()
     janela_main.title("Cadastro de fornecedores")
@@ -158,7 +205,7 @@ def main_config_supply():
         sheet_sup = planilha_sup.active
 
         #coletar os dados inseridos pelo usuário
-        supply_data = [nome_supply_entry.get(), razao_supply_entry.get(), produtos_supply_entry.get(), colab_supply_entry.get(), no_line_entry.get(), rej_int_entry.get(), field_entry.get()]
+        supply_data = [nome_supply_entry.get(), razao_supply_entry.get(), produtos_supply_entry.get(), colab_supply_entry.get(), no_line_entry.get(), rua_no_entry.get(), bairro_entry.get()]
 
         #encontrar a proxima linha vazia
         next_row_colab = sheet_sup.max_row + 1
@@ -184,42 +231,47 @@ def main_config_supply():
     texto_informativo = tk.Label(frame_cabecalho, text="DECATHLON: Movendo pessoas através das maravilhas do esporte com vitalidade, responsabilidade, generosidade e autenticidade")
     texto_informativo.pack()
 
-    # Adicione as caixas de texto e seus rótulos aqui
-    # Exemplo:
+    #nome fornecedor
     nome_supply_label = tk.Label(janela_main, text="Nome do Fornecedor:")
     nome_supply_label.grid(row=4, column=1, padx=10, pady=10, sticky="e")
     nome_supply_entry = tk.Entry(janela_main, width=25)
     nome_supply_entry.grid(row=4, column=2, padx=10, pady=10)
 
+    #razão social
     razao_supply_label = tk.Label(janela_main, text="Razão Social:")
     razao_supply_label.grid(row=5, column=1, padx=10, pady=10, sticky="e")
     razao_supply_entry = tk.Entry(janela_main, width=25)
     razao_supply_entry.grid(row=5, column=2, padx=10, pady=10)
 
+    #produtos fabricados
     produtos_supply_label = tk.Label(janela_main, text="Produtos:")
     produtos_supply_label.grid(row=6, column=1, padx=10, pady=10, sticky="e")
     produtos_supply_entry = tk.Entry(janela_main, width=25)
     produtos_supply_entry.grid(row=6, column=2, padx=10, pady=10)
 
+    #no. de colaboradores
     colab_supply_label = tk.Label(janela_main, text="No. Colaboradores:")
     colab_supply_label.grid(row=7, column=1, padx=10, pady=10, sticky="e")
     colab_supply_entry = tk.Entry(janela_main, width=25)
     colab_supply_entry.grid(row=7, column=2, padx=10, pady=10)
 
+    #no de linhas
     no_line_label = tk.Label(janela_main, text="No. de Linhas:")
     no_line_label.grid(row=8, column=1, padx=10, pady=10, sticky="e")
     no_line_entry = tk.Entry(janela_main, width=25)
     no_line_entry.grid(row=8, column=2, padx=10, pady=10)
 
-    rej_int_label = tk.Label(janela_main, text="Rej. Interna:")
-    rej_int_label.grid(row=9, column=1, padx=10, pady=10, sticky="e")
-    rej_int_entry = tk.Entry(janela_main, width=25)
-    rej_int_entry.grid(row=9, column=2, padx=10, pady=10)
+    #Rua, n.
+    rua_no_label = tk.Label(janela_main, text="Rua, nº:")
+    rua_no_label.grid(row=9, column=1, padx=10, pady=10, sticky="e")
+    rua_no_entry = tk.Entry(janela_main, width=25)
+    rua_no_entry.grid(row=9, column=2, padx=10, pady=10)
 
-    field_label = tk.Label(janela_main, text="Problemas de Campo:")
-    field_label.grid(row=10, column=1, padx=10, pady=10, sticky="e")
-    field_entry = tk.Entry(janela_main, width=25)
-    field_entry.grid(row=10, column=2, padx=10, pady=10)
+    #bairro
+    bairro_label = tk.Label(janela_main, text="Bairro:")
+    bairro_label.grid(row=10, column=1, padx=10, pady=10, sticky="e")
+    bairro_entry = tk.Entry(janela_main, width=25)
+    bairro_entry.grid(row=10, column=2, padx=10, pady=10)
 
     # Frame para a imagem
     frame_imagem = tk.Frame(janela_main)
@@ -237,6 +289,7 @@ def main_config_supply():
 
     janela_main.protocol("WM_DELETE_WINDOW", fechar_programa)
 
+#confirguração de fechamento do programa
 def fechar_programa():
     #destruir a janela main caso ainda exista após fechar a janela
     if 'janela_main' in globals():
@@ -246,8 +299,9 @@ def fechar_programa():
     # Feche a janela de login
     janela_login.destroy()
 
+#configuração de abertura da janela principal
 def open_main():
-    global janela_main, cadastro_auditorias_button, cadastro_fornecedores_button
+    global janela_main, cadastro_auditorias_button, cadastro_fornecedores_button, validar_data_input_cmd
     janela_main = tk.Toplevel()
     janela_main.title("Cadastro de Auditorias e Fornecedores DECATHLON")
 
@@ -257,6 +311,9 @@ def open_main():
     #posicionamento da janela
     janela_main.resizable(False,False)
     center_window(janela_main)
+
+    #formato digitação campo de data
+    validar_data_input_cmd = janela_main.register(validade_input)
 
     #missão e valores empresa
     texto_informativo = tk.Label(janela_main, text="DECATHLON: Movendo pessoas através das maravilhas do esporte com vitalidade, responsabilidade, generosidade e autenticidade")
@@ -284,7 +341,7 @@ def open_main():
     # Definindo uma função para fechar todas as janelas ao fechar o programa
     janela_main.protocol("WM_DELETE_WINDOW", fechar_programa)
 
-
+#configuração da tela de login
 def login():
     email = email_entry.get()
     senha = senha_entry.get()
@@ -294,6 +351,7 @@ def login():
     janela_login.withdraw()  # Esconde a janela de login
     open_main()
 
+#configuração da tela de registro de usuário
 def open_register():
     global janela_registro
     janela_registro = tk.Toplevel()
@@ -350,7 +408,7 @@ def open_register():
     #função
     funcao_label = tk.Label(janela_registro, text="Função: ")
     funcao_label.grid(row=4, column=0, padx=10, pady=10, sticky="e")
-    funcao_combobox = ttk.Combobox(janela_registro, values=["supplier", "auditor", "inspetor", "analista", "engenheiro", "chefe", "supervisor", "gerente"], width=25)
+    funcao_combobox = ttk.Combobox(janela_registro, values=["supplier", "auditor", "inspetor", "analista", "engenheiro", "chefe", "supervisor", "gerente"], state="readonly", width=25)
     funcao_combobox.grid(row=4, column=1, padx=10, pady=10)
     #esporte
     esporte_label = tk.Label(janela_registro, text="Esporte: ")
@@ -361,6 +419,7 @@ def open_register():
     janela_registro.protocol("WM_DELETE_WINDOW", fechar_programa) 
     janela_login.withdraw()  # Esconde a janela de login
 
+#configuração do início do programa
 def inciar_login():
     #definindo variáveis globais para acessar em outras funções
     global janela_login, email_entry, senha_entry
@@ -396,3 +455,7 @@ def inciar_login():
 inciar_login()
 
 
+#alterados campos de rej interna e field (audit)
+#alterados campos de rua, nº e bairro (supply)
+#formato digitação campo de data
+#formato input de specs
