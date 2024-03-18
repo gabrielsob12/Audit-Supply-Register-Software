@@ -78,7 +78,7 @@ def main_config_audit():
         sheet_sup = planilha_sup.active
 
         #coletar os dados inseridos pelo usuário
-        supply_data = [data_audit_entry.get(), rej_int_entry.get(), specprod_entry.get(), armazenamento_entry.get(), spec_test_entry.get(), field_entry.get(), postos_entry.get()]
+        supply_data = [data_audit_entry.get(), rej_int_entry.get(), specprod_combobox.get(), armazenamento_combobox.get(), spectest_combobox.get(), field_entry.get(), supply_combobox.get()]
 
         #encontrar a proxima linha vazia
         next_row_colab = sheet_sup.max_row + 1
@@ -153,8 +153,8 @@ def main_config_audit():
     #Spec. Armazenamento
     armazenamento_label = tk.Label(janela_main, text="Spec. Armazenamento:")
     armazenamento_label.grid(row=7, column=1, padx=10, pady=10, sticky="e")
-    specarm_combobox = ttk.Combobox(janela_main, values=["OK", "NG"], state="readonly", width=22)
-    specarm_combobox.grid(row=7, column=2, padx=10, pady=10)
+    armazenamento_combobox = ttk.Combobox(janela_main, values=["OK", "NG"], state="readonly", width=22)
+    armazenamento_combobox.grid(row=7, column=2, padx=10, pady=10)
     #Spec. Testes
     spectest_label = tk.Label(janela_main, text="Spec. Testes:")
     spectest_label.grid(row=8, column=1, padx=10, pady=10, sticky="e")
@@ -459,3 +459,4 @@ inciar_login()
 #alterados campos de rua, nº e bairro (supply)
 #formato digitação campo de data
 #formato input de specs
+#ajuste erro de combobox entry
